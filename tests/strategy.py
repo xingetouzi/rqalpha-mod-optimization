@@ -11,7 +11,7 @@ def init(context):
 
 def handle_bar(context, bar_dict):
     prices = history_bars(context.s1, context.LONGPERIOD + 1, '1d', 'close')
-    print(prices)
+    # print(prices)
     short_avg = talib.SMA(prices, context.SHORTPERIOD)
     long_avg = talib.SMA(prices, context.LONGPERIOD)
 
@@ -26,7 +26,14 @@ def handle_bar(context, bar_dict):
 
 
 if __name__ == "__main__":
+    import os
     from rqalpha import run
+
+
+    def get_file_root_relative_path(path):
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), path)
+
+
     long_period = 50
     short_period = 5
     config = {
@@ -55,10 +62,13 @@ if __name__ == "__main__":
             # },
             "sys_analyser": {
                 "enabled": True,
-                "output_file": "results/out-{short_period}-{long_period}.pkl".format(
+                "output_file": get_file_root_relative_path("results/out-{short_period}-{long_period}.pkl".format(
                     short_period=short_period,
                     long_period=long_period,
-                )
+                ))
+            },
+            "optimization": {
+                "enabled": True
             },
         },
     }

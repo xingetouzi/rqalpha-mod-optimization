@@ -6,7 +6,11 @@ from collections import OrderedDict
 from rqalpha_mod_optimization.utils import run_dask_multiprocess
 
 RESULT_PATH = os.path.join(os.path.dirname(__file__), "results_1m")
-os.makedirs(RESULT_PATH, exist_ok=True)
+try:
+    os.makedirs(RESULT_PATH)
+except OSError as e:
+    if e.errno != os.errno.EEXIST:
+        raise
 
 tasks1 = []
 
@@ -28,8 +32,8 @@ for short_period in range(3, 11, 2):
                 "end_date": "2016-01-01",
                 "stock_starting_cash": 100000,
                 "benchmark": "000001.XSHE",
-                "frequency": "1h",
-                "strategy_file": "strategy.py",
+                "frequency": "1m",
+                "strategy_file": os.path.join(os.path.dirname(os.path.abspath(__file__)), "strategy.py"),
                 "data_bundle_path": r"E:\Users\BurdenBear\.rqalpha\bundle",
             },
             "mod": {
@@ -46,10 +50,14 @@ for short_period in range(3, 11, 2):
                 "optimization": {
                     "enabled": True,
                 },
+                # "mongo_datasource": {
+                #     "enabled": True,
+                #     "mongo_url": "mongodb://192.168.0.101:27017",
+                #     "enable_cache": True
+                # }
                 "mongo_datasource": {
                     "enabled": True,
-                    "mongo_url": "mongodb://192.168.0.101:27017",
-                    "enable_cache": True
+                    "source": "bundle"
                 }
             },
         }
