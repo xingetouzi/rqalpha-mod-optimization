@@ -53,22 +53,14 @@ if __name__ == "__main__":
             "benchmark": "000001.XSHE",
             "frequency": "1d",
             "strategy_file": __file__,
-            "data_bundle_path": r"E:\Users\BurdenBear\.rqalpha\bundle",
         },
         "mod": {
-            # "sys_progress": {
-            #     "enabled": True,
-            #     "show": True,
-            # },
             "sys_analyser": {
                 "enabled": True,
                 "output_file": get_file_root_relative_path("results/out-{short_period}-{long_period}.pkl".format(
                     short_period=short_period,
                     long_period=long_period,
                 ))
-            },
-            "optimization": {
-                "enabled": True
             },
         },
     }

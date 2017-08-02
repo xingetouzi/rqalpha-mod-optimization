@@ -1,3 +1,4 @@
+import sys
 from pip.req import parse_requirements
 from os.path import dirname, join
 from setuptools import (
@@ -9,6 +10,9 @@ with open(join(dirname(__file__), 'VERSION.txt'), 'rb') as f:
     version = f.read().decode('ascii').strip()
 
 requirements = [str(ir.req) for ir in parse_requirements("requirements.txt", session=False)]
+
+if sys.version_info.major == 2:
+    requirements += [str(ir.req) for ir in parse_requirements("requirements-py2.txt", session=False)]
 
 setup(
     name='rqalpha-mod-optimization',
