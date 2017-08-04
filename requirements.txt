@@ -1,2 +1,3 @@
 rqalpha>=2.2.5
 dask>=0.15.0
+cloudpickle>=0.3.1

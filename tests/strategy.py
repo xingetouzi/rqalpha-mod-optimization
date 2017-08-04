@@ -1,3 +1,4 @@
+# encoding: utf-8
 from rqalpha.api import *
 import talib
 
@@ -18,7 +19,7 @@ def handle_bar(context, bar_dict):
     cur_position = context.portfolio.positions[context.s1].quantity
     shares = context.portfolio.cash / bar_dict[context.s1].close
 
-    if short_avg[-1] < long_avg[-1] and short_avg[-2] > long_avg[-2] and cur_position > 0:
+    if short_avg[-1] < long_avg[-1] and short_avg[-2] > long_avg[-2] and cur_position > 0:  # 止盈
         order_target_value(context.s1, 0)
 
     if short_avg[-1] > long_avg[-1] and short_avg[-2] < long_avg[-2]:
@@ -45,11 +46,10 @@ if __name__ == "__main__":
             "log_level": "debug",
         },
         "base": {
-            "securities": "stock",
+            "accounts": {"stock": 100000},
             "matching_type": "current_bar",
             "start_date": "2015-01-01",
             "end_date": "2016-01-01",
-            "stock_starting_cash": 100000,
             "benchmark": "000001.XSHE",
             "frequency": "1d",
             "strategy_file": __file__,
