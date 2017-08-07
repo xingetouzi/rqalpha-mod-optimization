@@ -26,6 +26,11 @@ setup(
     url='https://github.com/xingetouzi/rqalpha_mod_mongo_datasource',
     install_requires=requirements,
     zip_safe=False,
+    entry_points={
+        "console_scripts": [
+            "fxdayu = rqalpha_mod_optimization.nbextension.main:entry_point"
+        ]
+    },
     classifiers=[
         'Programming Language :: Python',
         'Operating System :: Microsoft :: Windows',

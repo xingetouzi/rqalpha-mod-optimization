@@ -4,9 +4,7 @@ import multiprocessing
 from itertools import chain
 
 import concurrent.futures
-import dask.multiprocessing
 import enum
-from dask import delayed, compute
 
 
 def run_synchronize(func, tasks, *args, **kwargs):
@@ -45,8 +43,23 @@ def run_raw_multiprocess(func, tasks, *args, **kwargs):
 
 
 def run_dask_multiprocess(func, tasks, *args, **kwargs):
+    import dask.multiprocessing
+    from dask import delayed, compute
     all_delayed = [delayed(func)(task, *args, **kwargs) for task in tasks]
     results = list(compute(*all_delayed, get=dask.multiprocessing.get))
+    return results
+
+
+def run_ipyparallel(func, tasks, *args, **kwargs):
+    from ipyparallel import Client
+    profile = kwargs.get("profile", None)
+    url_file = kwargs.get("usl_file", None)
+    client = Client(url_file=url_file, profile=profile)
+    _dview = client[:]
+    _lview = client.load_balanced_view()
+    delayed = [_lview.apply_async(func, task, *args, **kwargs) for task in tasks]
+    _lview.wait(delayed)
+    results = [delayed.get() for delayed in delayed]
     return results
 
 
@@ -55,6 +68,7 @@ class ParallelMethod(enum.Enum):
     PROCESS = "PROCESS"
     PROCESS_RAW = "PROCESS_RAW"
     DASK = "DASK"
+    PARALLEL = "TASK"
 
 
 _run_parallel_method = ParallelMethod.DASK

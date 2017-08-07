@@ -7,7 +7,7 @@ from itertools import product, chain
 import pandas as pd
 from rqalpha import run
 
-from rqalpha_mod_optimization.parallel import run_parallel
+from rqalpha_mod_optimization.parallel import run_parallel, set_parallel_method
 
 
 class AbstractAnalyzer(object):
@@ -36,8 +36,11 @@ class Optimizer(object):
     def clear(self):
         self._tasks = []
 
-    def optimize(self):
-        return run_parallel(run_bt, self._tasks, self)
+    def optimize(self, *args, **kwargs):
+        return run_parallel(run_bt, self._tasks, self, *args, **kwargs)
+
+    def set_parallel_method(self, method):
+        set_parallel_method(method)
 
 
 def run_bt(config, self, *args, **kwargs):
