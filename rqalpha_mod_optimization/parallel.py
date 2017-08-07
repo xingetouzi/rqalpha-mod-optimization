@@ -2,9 +2,10 @@
 # __author__ = "Morrison"
 import multiprocessing
 from itertools import chain
-
 import concurrent.futures
 import enum
+import os
+import sys
 
 
 def run_synchronize(func, tasks, *args, **kwargs):
@@ -52,8 +53,10 @@ def run_dask_multiprocess(func, tasks, *args, **kwargs):
 
 def run_ipyparallel(func, tasks, *args, **kwargs):
     from ipyparallel import Client
-    profile = kwargs.get("profile", None)
-    url_file = kwargs.get("usl_file", None)
+    profile = kwargs.get("profile", os.path.split(sys.exec_prefix)[-1])
+    url_file = kwargs.get("url_file", None)
+    if not profile and url_file:
+        raise ValueError("you must create a ipython profile first, try using 'fxdayu create_profile' in commands")
     client = Client(url_file=url_file, profile=profile)
     _dview = client[:]
     _lview = client.load_balanced_view()
