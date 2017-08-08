@@ -71,7 +71,7 @@ class ParallelMethod(enum.Enum):
     PROCESS = "PROCESS"
     PROCESS_RAW = "PROCESS_RAW"
     DASK = "DASK"
-    PARALLEL = "TASK"
+    IPYPARALLEL = "IPYPARALLEL"
 
 
 _run_parallel_method = ParallelMethod.DASK
@@ -81,6 +81,7 @@ _PARALLEL_METHOD = {
     ParallelMethod.PROCESS: run_multiprocess,
     ParallelMethod.PROCESS_RAW: run_raw_multiprocess,
     ParallelMethod.DASK: run_dask_multiprocess,
+    ParallelMethod.IPYPARALLEL: run_ipyparallel,
 }
 
 
