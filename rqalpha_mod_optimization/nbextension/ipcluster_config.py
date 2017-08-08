@@ -59,7 +59,7 @@ c.MarathonLauncher.controller_memory = int(os.environ.get("IPYPARALLEL_CONTROLLE
 # multiple users on the same cluster this will need to be changed
 c.MarathonLauncher.controller_config_port = '1235'
 
-c.MarathonLauncher.engine_docker_env_keep = eval(c.MarathonLauncher.engine_docker_env_keep.default_value_repr()) + \
+c.MarathonLauncher.engine_docker_env_keep = c.MarathonLauncher.engine_docker_env_keep.default_value() + \
                                             [
                                                 "CONDA_ENVS_PATH",
                                                 "CONDA_DEFAULT_ENV",
@@ -68,7 +68,7 @@ c.MarathonLauncher.engine_docker_env_keep = eval(c.MarathonLauncher.engine_docke
                                             ]
 
 if home:
-    c.MarathonLauncher.engine_docker_volumes = eval(c.MarathonLauncher.engine_docker_volumes.default_value_repr()) + \
+    c.MarathonLauncher.engine_docker_volumes = c.MarathonLauncher.engine_docker_volumes.default_value_repr() + \
                                                [
                                                    {
                                                        "HostPath": os.path.join(home, user),
