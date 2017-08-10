@@ -8,6 +8,17 @@ import os
 import sys
 
 
+def get_conda_env():
+    cmd = "conda env list"
+    path = sys.exec_prefix[0].upper() + sys.exec_prefix[1:]
+    lines = os.popen(cmd).readlines()
+    for line in lines:
+        line = line.replace("\n", "").replace("\r", " ")
+        if not line.startswith("#") and line.endswith(path):
+            return line.split(" ")[0]
+    return "root"
+
+
 def run_synchronize(func, tasks, *args, **kwargs):
     results = []
     for task in tasks:
@@ -53,7 +64,8 @@ def run_dask_multiprocess(func, tasks, *args, **kwargs):
 
 def run_ipyparallel(func, tasks, *args, **kwargs):
     from ipyparallel import Client
-    profile = kwargs.get("profile", os.path.split(sys.exec_prefix)[-1])
+
+    profile = kwargs.get("profile", get_conda_env())
     url_file = kwargs.get("url_file", None)
     if not profile and url_file:
         raise ValueError("you must create a ipython profile first, try using 'fxdayu create_profile' in commands")

@@ -86,7 +86,7 @@ class SimpleOptimizeApplication(object):
         self._base = self._union_config(self._base, kwargs)
         return self
 
-    def optimize(self, params):
+    def optimize(self, params, *args, **kwargs):
         keys = sorted(params.keys())
         ranges = [params[key] for key in keys]
         tasks = []
@@ -109,7 +109,7 @@ class SimpleOptimizeApplication(object):
             }
             tasks.append(config)
         self._optimizer.summit(*tasks)
-        return self._analyser.analysis(tasks, self._optimizer.optimize())
+        return self._analyser.analysis(tasks, self._optimizer.optimize(*args, **kwargs))
 
 
 class SummaryAnalyzer(object):
