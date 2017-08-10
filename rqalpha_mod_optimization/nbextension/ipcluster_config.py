@@ -67,9 +67,4 @@ c.MarathonLauncher.engine_docker_env_keep.extend([
 ])
 
 if home:
-    c.MarathonLauncher.engine_docker_volumes.extend([
-        {
-            "HostPath": os.path.join(home, user),
-            "ContainerPath": os.path.join(home, user),
-        }
-    ])
+    c.MarathonLauncher.engine_docker_volumes.append("%s:%s" % (os.path.join(home, user), os.path.join("/home", user)))
