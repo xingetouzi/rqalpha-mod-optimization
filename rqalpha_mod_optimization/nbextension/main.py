@@ -1,10 +1,19 @@
 import os
 import json
 import codecs
+import sys
 import shutil
 import click
+import platform
+
+from rqalpha_mod_optimization.utils import get_conda_env
 
 CONTEXT_SETTINGS = {
+}
+
+BIN_DIR = {
+    "Windows": "Scripts",
+    "Linux": "bin"
 }
 
 
@@ -26,9 +35,12 @@ def cli(ctx, verbose):
 @click.option("-n", "--name", default="root",
               help="profile's name")
 def create_profile(path, name):
-    profile_name = os.environ.get("CONDA_DEFAULT_ENV", name)
-    status = os.system("ipython profile create --parallel --profile=%s --ipython-dir=%s" %
-                       (profile_name, path))
+    profile_name = get_conda_env()
+    prefix = sys.exec_prefix
+    cmd = "%s profile create --parallel --profile=%s --ipython-dir=%s" % \
+          (os.path.join(prefix, BIN_DIR[platform.system()], "ipython"), profile_name, path)
+    print(cmd)
+    status = os.system(cmd)
     if status:
         return status
     shutil.copy(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ipcluster_config.py"),

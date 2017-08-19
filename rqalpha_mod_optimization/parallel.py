@@ -2,21 +2,11 @@
 # __author__ = "Morrison"
 import multiprocessing
 from itertools import chain
+
 import concurrent.futures
 import enum
-import os
-import sys
 
-
-def get_conda_env():
-    cmd = "conda env list"
-    path = sys.exec_prefix[0].upper() + sys.exec_prefix[1:]
-    lines = os.popen(cmd).readlines()
-    for line in lines:
-        line = line.replace("\n", "").replace("\r", " ")
-        if not line.startswith("#") and line.endswith(path):
-            return line.split(" ")[0]
-    return "root"
+from rqalpha_mod_optimization.utils import get_conda_env
 
 
 def run_synchronize(func, tasks, *args, **kwargs):
