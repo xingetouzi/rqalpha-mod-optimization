@@ -1,5 +1,7 @@
+import six
 import os
 import sys
+import subprocess
 import platform
 
 
@@ -22,14 +24,22 @@ class Singleton(type):
 
 
 def get_conda_env():
-    cmd = "conda env list"
     if platform.system() == "Windows":
         path = sys.exec_prefix[0].upper() + sys.exec_prefix[1:]
+        bin_dir = "Scripts"
+        encoding = "gbk"
     elif platform.system() == "Linux":
         path = sys.exec_prefix
-    lines = os.popen(cmd).readlines()
-    for line in lines:
-        line = line.replace("\n", "").replace("\r", " ")
+        bin_dir = "bin"
+        encoding = "utf-8"
+    else:
+        raise OSError("Unsupported OS")
+    cmd = [os.path.join(path, bin_dir, "conda"), "env", "list"]
+    lines = subprocess.check_output(cmd, shell=True)
+    if isinstance(lines, six.binary_type):
+        lines = lines.decode(encoding)
+    print(type(lines))
+    for line in lines.splitlines():
         if not line.startswith("#") and line.endswith(path):
             return line.split(" ")[0]
     return "root"
