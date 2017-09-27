@@ -23,7 +23,7 @@ setup(
     author_email='public@fxdayu.com',
     license='Apache License v2',
     package_data={'': ['*.*']},
-    url='https://github.com/xingetouzi/rqalpha_mod_mongo_datasource',
+    url='https://github.com/xingetouzi/rqalpha-mod-optimization',
     install_requires=requirements,
     zip_safe=False,
     entry_points={

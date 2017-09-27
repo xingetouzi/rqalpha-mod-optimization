@@ -102,7 +102,7 @@ class SimpleOptimizeApplication(object):
             config = self._union_config(self._base, {"extra": {
                 "context_vars": {k: v for k, v in zip(keys, para)},
             }})
-            param_repr = [str(p) for p in para]
+            param_repr = [str(p).replace(".", "#") for p in para]
             config["mod"]["sys_analyser"] = {
                 "enabled": True,
                 "output_file": os.path.join(result_root, "-".join(["out"] + param_repr) + ".pkl")
@@ -126,7 +126,7 @@ class SummaryAnalyzer(object):
         }
         for k, v in zip(sorted(config["extra"]["context_vars"].keys()),
                         os.path.basename(file_name).split(".")[0].split("-")[1:]):
-            result[k] = float(v)
+            result[k] = float(v.replace("#", "."))
         return result
 
     def analysis(self, tasks, results):
