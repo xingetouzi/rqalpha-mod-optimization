@@ -130,7 +130,7 @@ class SimpleOptimizeApplication(object):
                 raise
         for para in product(*ranges):
             for da in product(*dranges):
-                config = self._union_config(config, {"extra": {
+                config = self._union_config(self._base, {"extra": {
                     "context_vars": {k: v for k, v in zip(keys, para)},
                 }})
                 # 如果起始日期大于结束日期，则不加入
