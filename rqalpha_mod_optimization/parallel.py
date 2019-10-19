@@ -48,7 +48,7 @@ def run_dask_multiprocess(func, tasks, *args, **kwargs):
     import dask.multiprocessing
     from dask import delayed, compute
     all_delayed = [delayed(func)(task, *args, **kwargs) for task in tasks]
-    results = list(compute(*all_delayed, get=dask.multiprocessing.get))
+    results = list(compute(*all_delayed, scheduler='processes'))
     return results
 
 
