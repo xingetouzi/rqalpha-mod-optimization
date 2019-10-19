@@ -154,6 +154,15 @@ class SimpleOptimizeApplication(object):
                     "plot_save_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".png")
                 }
                 tasks.append(config2)
+
+        # 如果debug，则只打印。
+        debug = bool(kwargs.get("debug",0))
+        if (debug):
+            with open("optimizer_debug.txt", "w", encoding='utf-8') as f:
+                f.write(tasks)
+                f.close()
+            return pd.DataFrame()
+
         self._optimizer.summit(*tasks)
         return self._analyser.analysis(tasks, self._optimizer.optimize(*args, **kwargs))
 
