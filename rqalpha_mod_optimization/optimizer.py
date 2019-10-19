@@ -133,6 +133,11 @@ class SimpleOptimizeApplication(object):
                 config = self._union_config(config, {"extra": {
                     "context_vars": {k: v for k, v in zip(keys, para)},
                 }})
+                # 如果起始日期大于结束日期，则不加入
+                if (da[0] > da[2]):
+                    continue
+                if (da[1] >= da[3]):
+                    continue
                 start_date = "%d-%d-01" %(da[0],da[1])
                 end_date = "%d-%d-20" %(da[2],da[3])
                 config2 = self._union_config(config, {"base": {
