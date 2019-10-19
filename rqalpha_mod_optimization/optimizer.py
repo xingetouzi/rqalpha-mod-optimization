@@ -159,7 +159,8 @@ class SimpleOptimizeApplication(object):
         debug = bool(kwargs.get("debug",0))
         if (debug):
             with open("optimizer_debug.txt", "w", encoding='utf-8') as f:
-                f.write(tasks)
+                s = str(tasks)
+                f.write(s)
                 f.close()
             return pd.DataFrame()
 
