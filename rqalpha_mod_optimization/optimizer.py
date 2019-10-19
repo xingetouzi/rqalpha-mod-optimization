@@ -148,7 +148,7 @@ class SimpleOptimizeApplication(object):
                 start = start_date.replace("-","_")
                 end = end_date.replace("-","_")
 
-                config["mod"]["sys_analyser"] = {
+                config2["mod"]["sys_analyser"] = {
                     "enabled": True,
                     "output_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".pkl"),
                     "plot_save_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".png")
