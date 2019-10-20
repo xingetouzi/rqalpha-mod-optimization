@@ -187,7 +187,7 @@ class SummaryAnalyzer(object):
 
     def analysis(self, tasks, results):
         results = run_parallel(self._analysis, list(zip(tasks, results)))
-        return pd.DataFrame(results)#.set_index(list(tasks[0]["extra"]["context_vars"].keys()))
+        return pd.DataFrame(results).set_index(list(tasks[0]["extra"]["context_vars"].keys()))
 
 
 class GraphicAnalyzer(object):
