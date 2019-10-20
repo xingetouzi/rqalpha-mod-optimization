@@ -111,8 +111,41 @@ class SimpleOptimizeApplication(object):
         self._optimizer.summit(*tasks)
         return self._analyser.analysis(tasks, self._optimizer.optimize(*args, **kwargs))
 
+
+class SummaryAnalyzer(object):
+    @staticmethod
+    def _analysis(args):
+        config, result = args
+        file_name = config["mod"]["sys_analyser"]["output_file"]
+        result_dict = pd.read_pickle(file_name)
+        summary = result_dict["summary"]
+        result = {
+            "annualized_returns": summary["annualized_returns"],
+            "sharpe": summary["sharpe"],
+            "max_drawdown": summary["max_drawdown"],
+        }
+        for k, v in zip(sorted(config["extra"]["context_vars"].keys()),
+                        os.path.basename(file_name).split(".")[0].split("-")[1:]):
+            result[k] = float(v.replace("#", "."))
+        return result
+
+    def analysis(self, tasks, results):
+        results = run_parallel(self._analysis, list(zip(tasks, results)))
+        return pd.DataFrame(results).set_index(list(tasks[0]["extra"]["context_vars"].keys()))
+
+
+class GraphicAnalyzer(object):
+    results = []
+
+
+class DateOptimizeApplication(SimpleOptimizeApplication):
+
+    def __init__(self, config):
+        SimpleOptimizeApplication.__init__(self, config)
+        self._analyser = DateSummaryAnalyzer()
+
     # 加入不同的日期的优化
-    def date_optimize(self, params, dates, *args, **kwargs):
+    def optimize(self, params, dates, *args, **kwargs):
         keys = sorted(params.keys())
         ranges = [params[key] for key in keys]
 
@@ -168,7 +201,7 @@ class SimpleOptimizeApplication(object):
         return self._analyser.analysis(tasks, self._optimizer.optimize(*args, **kwargs))
 
 
-class SummaryAnalyzer(object):
+class DateSummaryAnalyzer(SummaryAnalyzer):
     @staticmethod
     def _analysis(args):
         config, result = args
@@ -180,15 +213,16 @@ class SummaryAnalyzer(object):
             "sharpe": summary["sharpe"],
             "max_drawdown": summary["max_drawdown"],
         }
+
+        params = os.path.basename(file_name).split(".")[0].split("_")
         for k, v in zip(sorted(config["extra"]["context_vars"].keys()),
-                        os.path.basename(file_name).split(".")[0].split("-")[1:]):
+                        params[6:]):
             result[k] = float(v.replace("#", "."))
+        dates = ['start_year', 'start_month', 'start_day', 'end_year', 'end_month', 'end_day']
+        for k, v in zip(dates, params[0:6]):
+            result[k] = v
         return result
 
     def analysis(self, tasks, results):
         results = run_parallel(self._analysis, list(zip(tasks, results)))
-        return pd.DataFrame(results).set_index(list(tasks[0]["extra"]["context_vars"].keys()))
-
-
-class GraphicAnalyzer(object):
-    results = []
+        return pd.DataFrame(results)
