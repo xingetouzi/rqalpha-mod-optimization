@@ -111,6 +111,62 @@ class SimpleOptimizeApplication(object):
         self._optimizer.summit(*tasks)
         return self._analyser.analysis(tasks, self._optimizer.optimize(*args, **kwargs))
 
+    # 加入不同的日期的优化
+    def date_optimize(self, params, dates, *args, **kwargs):
+        keys = sorted(params.keys())
+        ranges = [params[key] for key in keys]
+
+        dkeys = (dates.keys())
+        dranges = [dates[key] for key in dkeys]
+
+        tasks = []
+        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        strategy_name = os.path.basename(self._base["base"]["strategy_file"]).replace(".py", "")
+        result_root = os.path.join(".", "optimize-%s-%s" % (strategy_name, timestamp))
+        try:
+            os.makedirs(result_root)
+        except OSError as e:
+            if e.errno != os.errno.EEXIST:
+                raise
+        for para in product(*ranges):
+            for da in product(*dranges):
+                config = self._union_config(self._base, {"extra": {
+                    "context_vars": {k: v for k, v in zip(keys, para)},
+                }})
+                # 如果起始日期大于结束日期，则不加入
+                if (da[0] > da[2]):
+                    continue
+                if (da[1] >= da[3]):
+                    continue
+                start_date = "%d-%d-01" %(da[0],da[1])
+                end_date = "%d-%d-20" %(da[2],da[3])
+                config2 = self._union_config(config, {"base": {
+                    "start_date": start_date,
+                    "end_date": end_date
+                }})
+                param_repr = [str(p).replace(".", "#") for p in para]
+                start = start_date.replace("-","_")
+                end = end_date.replace("-","_")
+
+                config2["mod"]["sys_analyser"] = {
+                    "enabled": True,
+                    "output_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".pkl"),
+                    "plot_save_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".png")
+                }
+                tasks.append(config2)
+
+        # 如果debug，则只打印。
+        debug = bool(kwargs.get("debug",0))
+        if (debug):
+            with open("optimizer_debug.txt", "w", encoding='utf-8') as f:
+                s = str(tasks)
+                f.write(s)
+                f.close()
+            return pd.DataFrame()
+
+        self._optimizer.summit(*tasks)
+        return self._analyser.analysis(tasks, self._optimizer.optimize(*args, **kwargs))
+
 
 class SummaryAnalyzer(object):
     @staticmethod
