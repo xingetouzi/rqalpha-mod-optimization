@@ -8,6 +8,11 @@ rqalpha自带的数据源在使用池化资源进行参数优化时会造成内�
 $ pip install git+https://github.com/xingetouzi/rqalpha-mod-optimization.git
 $ rqalpha mod install optimization
 ```
+或者: 
+```
+$ git clone 
+$ sh reinstall.sh
+```
 
 ## rqalpha中关于外部参数传入的方案
 在rqalpha中，如需从外部向策略中传入参数，可以设置如下项```config["extra"]["context_vars"]```：
