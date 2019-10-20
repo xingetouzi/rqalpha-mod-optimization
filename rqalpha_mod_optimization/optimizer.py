@@ -105,7 +105,7 @@ class SimpleOptimizeApplication(object):
             param_repr = [str(p).replace(".", "#") for p in para]
             config["mod"]["sys_analyser"] = {
                 "enabled": True,
-                "output_file": os.path.join(result_root, "-".join(["out"] + param_repr) + ".pkl")
+                "output_file": os.path.join(result_root, "_".join(["out"] + param_repr) + ".pkl")
             }
             tasks.append(config)
         self._optimizer.summit(*tasks)
@@ -125,7 +125,7 @@ class SummaryAnalyzer(object):
             "max_drawdown": summary["max_drawdown"],
         }
         for k, v in zip(sorted(config["extra"]["context_vars"].keys()),
-                        os.path.basename(file_name).split(".")[0].split("-")[1:]):
+                        os.path.basename(file_name).split(".")[0].split("_")[1:]):
             result[k] = float(v.replace("#", "."))
         return result
 
