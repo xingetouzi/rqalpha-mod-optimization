@@ -92,6 +92,8 @@ class SimpleOptimizeApplication(object):
         tasks = []
         timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
         strategy_name = os.path.basename(self._base["base"]["strategy_file"]).replace(".py", "")
+        start = self._base["base"]["start_date"]
+        end = self._base["base"]["end_date"]
         result_root = os.path.join(".", "optimize-%s-%s" % (strategy_name, timestamp))
         try:
             os.makedirs(result_root)
@@ -105,7 +107,8 @@ class SimpleOptimizeApplication(object):
             param_repr = [str(p).replace(".", "#") for p in para]
             config["mod"]["sys_analyser"] = {
                 "enabled": True,
-                "output_file": os.path.join(result_root, "_".join(["out"] + param_repr) + ".pkl")
+                "output_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".pkl"),
+                "plot_save_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".png")
             }
             tasks.append(config)
         self._optimizer.summit(*tasks)
@@ -123,9 +126,10 @@ class SummaryAnalyzer(object):
             "annualized_returns": summary["annualized_returns"],
             "sharpe": summary["sharpe"],
             "max_drawdown": summary["max_drawdown"],
+            "benchmark": summary["benchmark_annualized_returns"],
         }
         for k, v in zip(sorted(config["extra"]["context_vars"].keys()),
-                        os.path.basename(file_name).split(".")[0].split("_")[1:]):
+                        os.path.basename(file_name).split(".")[0].split("_")[2:]):
             result[k] = float(v.replace("#", "."))
         return result
 
@@ -212,6 +216,7 @@ class DateSummaryAnalyzer(SummaryAnalyzer):
             "annualized_returns": summary["annualized_returns"],
             "sharpe": summary["sharpe"],
             "max_drawdown": summary["max_drawdown"],
+            "benchmark": summary["benchmark_annualized_returns"],
         }
 
         params = os.path.basename(file_name).split(".")[0].split("_")
