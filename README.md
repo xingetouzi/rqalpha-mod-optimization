@@ -2,11 +2,20 @@
 
 rqalpha自带的数据源在使用池化资源进行参数优化时会造成内存泄露，该插件解决了该问题并封装了参数优化方法
 
+### 修改日志
+20191019 
+增加了修改回测起始时间的办法
+
 ## 安装方法
 在Terminal中运行以下命令
 ```
 $ pip install git+https://github.com/xingetouzi/rqalpha-mod-optimization.git
 $ rqalpha mod install optimization
+```
+或者: 
+```
+$ git clone 
+$ sh reinstall.sh
 ```
 
 ## rqalpha中关于外部参数传入的方案

@@ -92,7 +92,9 @@ class SimpleOptimizeApplication(object):
         tasks = []
         timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
         strategy_name = os.path.basename(self._base["base"]["strategy_file"]).replace(".py", "")
-        result_root = os.path.join(".", "optimize-%s-%s" % (strategy_name, timestamp))
+        start = self._base["base"]["start_date"]
+        end = self._base["base"]["end_date"]
+        result_root = os.path.join(os.path.abspath("."), "optimize-%s-%s" % (strategy_name, timestamp))
         try:
             os.makedirs(result_root)
         except OSError as e:
@@ -105,7 +107,8 @@ class SimpleOptimizeApplication(object):
             param_repr = [str(p).replace(".", "#") for p in para]
             config["mod"]["sys_analyser"] = {
                 "enabled": True,
-                "output_file": os.path.join(result_root, "-".join(["out"] + param_repr) + ".pkl")
+                "output_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".pkl"),
+                "plot_save_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".png")
             }
             tasks.append(config)
         self._optimizer.summit(*tasks)
@@ -123,9 +126,10 @@ class SummaryAnalyzer(object):
             "annualized_returns": summary["annualized_returns"],
             "sharpe": summary["sharpe"],
             "max_drawdown": summary["max_drawdown"],
+            "benchmark": summary["benchmark_annualized_returns"],
         }
         for k, v in zip(sorted(config["extra"]["context_vars"].keys()),
-                        os.path.basename(file_name).split(".")[0].split("-")[1:]):
+                        os.path.basename(file_name).split(".")[0].split("_")[2:]):
             result[k] = float(v.replace("#", "."))
         return result
 
@@ -136,3 +140,94 @@ class SummaryAnalyzer(object):
 
 class GraphicAnalyzer(object):
     results = []
+
+
+class DateOptimizeApplication(SimpleOptimizeApplication):
+
+    def __init__(self, config):
+        SimpleOptimizeApplication.__init__(self, config)
+        self._analyser = DateSummaryAnalyzer()
+
+    # 加入不同的日期的优化
+    def optimize(self, params, dates, *args, **kwargs):
+        keys = sorted(params.keys())
+        ranges = [params[key] for key in keys]
+
+        dkeys = (dates.keys())
+        dranges = [dates[key] for key in dkeys]
+
+        tasks = []
+        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        strategy_name = os.path.basename(self._base["base"]["strategy_file"]).replace(".py", "")
+        result_root = os.path.join(os.path.abspath("."), "optimize-%s-%s" % (strategy_name, timestamp))
+        try:
+            os.makedirs(result_root)
+        except OSError as e:
+            if e.errno != os.errno.EEXIST:
+                raise
+        for para in product(*ranges):
+            for da in product(*dranges):
+                config = self._union_config(self._base, {"extra": {
+                    "context_vars": {k: v for k, v in zip(keys, para)},
+                }})
+                # 如果起始日期大于结束日期，则不加入
+                if (da[0] > da[2]):
+                    continue
+                if (da[1] >= da[3]):
+                    continue
+                start_date = "%d-%d-01" %(da[0],da[1])
+                end_date = "%d-%d-20" %(da[2],da[3])
+                config2 = self._union_config(config, {"base": {
+                    "start_date": start_date,
+                    "end_date": end_date
+                }})
+                param_repr = [str(p).replace(".", "#") for p in para]
+                start = start_date.replace("-","_")
+                end = end_date.replace("-","_")
+
+                config2["mod"]["sys_analyser"] = {
+                    "enabled": True,
+                    "output_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".pkl"),
+                    "plot_save_file": os.path.join(result_root, "_".join([start + "_" + end] + param_repr) + ".png")
+                }
+                tasks.append(config2)
+
+        # 如果debug，则只打印。
+        debug = bool(kwargs.get("debug",0))
+        if (debug):
+            with open("optimizer_debug.txt", "w", encoding='utf-8') as f:
+                s = str(tasks)
+                f.write(s)
+                f.close()
+            return pd.DataFrame()
+
+        self._optimizer.summit(*tasks)
+        return self._analyser.analysis(tasks, self._optimizer.optimize(*args, **kwargs))
+
+
+class DateSummaryAnalyzer(SummaryAnalyzer):
+    @staticmethod
+    def _analysis(args):
+        config, result = args
+        file_name = config["mod"]["sys_analyser"]["output_file"]
+        result_dict = pd.read_pickle(file_name)
+        summary = result_dict["summary"]
+        result = {
+            "annualized_returns": summary["annualized_returns"],
+            "sharpe": summary["sharpe"],
+            "max_drawdown": summary["max_drawdown"],
+            "benchmark": summary["benchmark_annualized_returns"],
+        }
+
+        params = os.path.basename(file_name).split(".")[0].split("_")
+        for k, v in zip(sorted(config["extra"]["context_vars"].keys()),
+                        params[6:]):
+            result[k] = float(v.replace("#", "."))
+        dates = ['start_year', 'start_month', 'start_day', 'end_year', 'end_month', 'end_day']
+        for k, v in zip(dates, params[0:6]):
+            result[k] = v
+        return result
+
+    def analysis(self, tasks, results):
+        results = run_parallel(self._analysis, list(zip(tasks, results)))
+        return pd.DataFrame(results)
