@@ -94,7 +94,7 @@ class SimpleOptimizeApplication(object):
         strategy_name = os.path.basename(self._base["base"]["strategy_file"]).replace(".py", "")
         start = self._base["base"]["start_date"]
         end = self._base["base"]["end_date"]
-        result_root = os.path.join(".", "optimize-%s-%s" % (strategy_name, timestamp))
+        result_root = os.path.join(os.path.abspath("."), "optimize-%s-%s" % (strategy_name, timestamp))
         try:
             os.makedirs(result_root)
         except OSError as e:
